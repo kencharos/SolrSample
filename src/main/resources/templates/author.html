@@ -1,0 +1,28 @@
+<div layout:decorator="layout">
+<th:block layout:fragment="main">
+
+<h1>著者登録</h1>
+
+<form action="#" th:action="@{/author}" method="post" class="form" th:object="${author}">
+
+<div  class="form-group">
+    <label for="name" >名前</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Error</span>
+    <input type="text" name="name" id="name" class="form-control" th:field="*{name}"  />
+</div>
+<div  class="form-group" >
+    <label for="kana" >カナ</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('kana')}" th:errors="*{kana}">Error</span>
+    <input type="text" name="kana" id="kana" class="form-control" th:field="*{kana}" />
+</div>
+<div  class="form-group" >
+    <label for="kana" >紹介</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('intro')}" th:errors="*{intro}">Error</span>
+    <input type="text" name="intro" id="intro" class="form-control" th:field="*{intro}" />
+</div>
+
+<button type="submit" class="btn btn-primary">登録</button>
+</form>
+
+</th:block>
+</div>

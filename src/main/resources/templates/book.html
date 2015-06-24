@@ -1,0 +1,54 @@
+<div layout:decorator="layout">
+<th:block layout:fragment="main">
+
+<h1>書籍登録</h1>
+
+<form action="#" th:action="@{/book}" method="post" class="form" th:object="${bookBean}">
+
+<ul th:if="${#fields.hasAnyErrors()}">
+ <li class="text-danger" th:each="err : ${#fields.allErrors()}" th:text="${err}">err</li>
+</ul>
+
+<div  class="form-group">
+    <label for="name" >名前</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Error</span>
+    <input type="text" name="name" id="name" class="form-control" th:field="*{name}"  />
+</div>
+<div  class="form-group" >
+    <label for="kana" >カナ</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('kana')}" th:errors="*{kana}">Error</span>
+    <input type="text" name="kana" id="kana" class="form-control" th:field="*{kana}" />
+</div>
+<div  class="form-group" >
+    <label for="intro" >概要</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('intro')}" th:errors="*{intro}">Error</span>
+    <textarea name="intro" id="intro" class="form-control" th:field="*{intro}"></textarea>
+</div>
+<div  class="form-group" >
+    <label for="author" >著者</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Error</span>
+    <select name="author" id="author" class="form-control"  th:field="*{author}">
+    	<option th:each="a:${authors}" 
+          th:value="${a.id}" 
+          th:text="${a.name}">sample</option>
+    </select>
+</div>
+<div  class="form-group" >
+    <label for="prcie" >価格</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Error</span>
+    <input type="number" name="prcie" id="prcie" class="form-control" th:field="*{price}"/>
+</div>
+<div  class="form-group" >
+    <label for="category">媒体</label>
+    <span class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Error</span>
+    <select id="category" name="category" class="form-control" th:field="*{category}">
+    	<option value="紙">紙</option>
+    	<option value="電子書籍">電子書籍</option>
+    </select>
+</div>
+
+<button type="submit" class="btn btn-primary">登録</button>
+</form>
+
+</th:block>
+</div>

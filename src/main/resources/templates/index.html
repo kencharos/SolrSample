@@ -1,0 +1,21 @@
+<div layout:decorator="layout">
+    <th:block layout:fragment="main">
+    <ul>
+		<li> <a href="book">書籍登録</a></li>
+		<li> <a href="author">著者登録</a></li>
+		<li> <a href="search?type=init">あいまい検索</a></li>
+		<li> <input id="removeIndex" type="button" class="btn btn-link" value="インデックス削除" /></li>
+		<li> <input id="reindex" type="button" class="btn btn-link" value="インデックス再構築" /></li>
+	</ul>
+<script>
+$(function() {
+	$("#removeIndex").click(function(e){
+		ajaxGet("removeIndex");
+	})
+	$("#reindex").click(function(e){
+		ajaxGet("reindex");
+	})
+});
+</script>
+    </th:block>
+</div>

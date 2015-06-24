@@ -1,0 +1,168 @@
+<div layout:decorator="layout">
+<th:block layout:fragment="main">
+
+<h1>あいまい検索</h1>
+
+<form id="form" action="#" th:action="@{/search}" method="get" class="form" th:object="${criteria}">
+<div class="col-md-12">
+    <input type="hidden" name="fc" id="fc" th:field="*{fc}" />
+
+<ul th:if="${#fields.hasAnyErrors()}">
+ <li class="text-danger" th:each="err : ${#fields.allErrors()}" th:text="${err}">err</li>
+</ul>
+<div class="form-inline">
+	<div class="row">
+	<p class="text-info">スペースで区切った単語はOR検索です。ANDを入れるとAND検索。*,?はワイルドカード。 word~で曖昧検索。 　()でグルーピング。　</p>
+	<p class="text-warning">検索結果は、名前でヒットしたレコードの方が優先されます。書籍の著者名でヒットした場合は著者名は装飾されません。</p>
+	<p class="text-warning">カナ検索は、ひらがな・カタカナ可能。カナ検索でヒットしたレコードは、ヒット部分が装飾されません。</p>
+	</div>
+	
+	<div  class="form-group">
+		<label for="text">キーワード</label>
+	    <div class="input-group">
+		    <select th:field="*{category}" class="form-control input-group-addon" name="category">
+		    	<option value="">すべて</option>
+		    	<option value="書籍">書籍</option>
+		    	<option value="著者">著者</option>
+		    </select>
+		    <span class="input-group-addon">
+		    	<label for="containKana" >カナ含む</label>
+	    		<input type="checkbox" name="containKana" id="containKana" 
+	    		 th:field="*{containKana}"  />
+		    </span>
+			<input type="text" name="text" size="40" id="text" class="form-control" th:field="*{text}" 
+			    	autocomplete="off" placeholder="*で全件検索" />
+	    </div>
+	    		
+	    <label for="priceFrom" >価格(試験用)</label>
+	    <input type="number" name="priceFrom" size="3" id="priceFrom" class="form-control" th:field="*{priceFrom}" />
+	    <span>-</span>
+	    <input type="number" name="priceTo" size="3" id="priceTo" class="form-control" th:field="*{priceTo}" />
+		
+	</div>
+</div>
+<button type="submit" class="btn btn-primary">検索</button>
+
+	<span class="text-info">もしかして? </span><strong><span th:text="${dym}"></span></strong>
+</div>
+<hr/>
+<h2>検索結果</h2>
+<div class="col-md-2">
+<ul class="facet">
+	<li th:each ="fc: ${facet}" class="parent">
+		<input type="checkbox" th:value="${fc.name}"/>
+		<a th:href="${'/search' + query + fc.query}" th:text="${fc.name + '(' + fc.count + ')'}">紙(1)</a>
+		<ul th:if="${fc.hasChild()}">
+			<li th:each ="sub: ${fc.children}" class="sub">
+				<input type="checkbox" th:value="${sub.name}"/>
+				<a th:href="${'/search' + query + sub.query}" th:text="${sub.name + '(' + sub.count + ')'}">紙(1)</a>
+			</li>
+		</ul>
+	</li>
+</ul>
+</div>
+
+<div class="col-md-10">
+    <table class="table table-hover table-bordered parts">
+      <tr>
+        <th style="width:80px;">ID</th>
+        <th style="width:110px;">カテゴリ:サブカテゴリ</th>
+        <th style="width:230px;">名前</th>
+        <th>概要</th>
+      </tr>
+      <tr th:each="res : ${list}">
+        <td><a th:href="${'/detail/' + res.id}" target="_blank" th:text="${res.id}">${res.id}</a></td>
+        <td th:text="${res.category + ':' + res.subCategory}">test</td>
+        <td th:utext="${res.fmtName}">123</td>
+        <td th:utext="${res.contents}">123</td>
+      </tr>
+    </table>
+</div>
+</form>
+<script>
+//<![CDATA[
+
+$(function(){
+	/*
+	$("#text").keyup(function(e){
+		
+		ajaxGet("/search/suggest", {word:$(this).val()}, function(data){
+			
+			var list = $("#suggest");
+			list.html("");
+			var ops = "";
+			if (data && data.length > 0) {
+
+				for (var i = 0; i<data.length; i++) {
+					ops += "<option value='" + data[i] + "'></option>";
+				}
+				list.html(ops);
+			}
+			$(this).attr("list", null);
+			$(this).attr("list", "suggest");
+		})
+		
+	})
+	*/
+	$("#text").autocomplete({
+        search: function (event, ui) {
+            if (event.keyCode == 229) return false;
+            return true;
+        },
+        source: function (request, response) {
+        	var word = $("#text").val();
+        	if(word.length < 2) {
+        		return;
+        	}
+        	ajaxGet("/search/suggest", {word:word},
+                function (data) {
+                    response(data);
+                });
+        },
+        open: function () {
+            $(this).removeClass("ui-corner-all");
+        }
+    }).keyup(function (event) {
+        if (event.keyCode == 13) {
+            //$(this).autocomplete("search");
+        }
+        if (event.which == 13 && event.which == keyDownCode) {
+        }
+    }).keydown(function (event) {
+        keyDownCode = event.which;
+    });
+	
+	document.getElementById("form").onsubmit = function(e) {
+		$("#fc").val("");
+		
+		var arr = [];
+		$("ul li[class^='parent']").each(function(i,e) {
+			var cs = e.getElementsByTagName("input");
+			var p = cs[0];
+			var children = [];
+			for (var i = 1; i < cs.length; i++){
+				children.push(cs[i]);
+			}
+			if (children.length > 0
+			 && children.filter(function(e){return e.checked}).length > 0){
+				p.checked = true;
+			}
+			if (p.checked) {
+				var v = $("#fc").val();
+				
+				var s = p.value;
+				children.forEach(function(e){
+					if (e.checked){ s += ("," + e.value); }
+				})
+				arr.push(s);
+			}
+		});
+		$("#fc").val(arr.join("_"));
+		return true;
+	}
+	
+});
+//]]>
+</script>
+</th:block>
+</div>
